@@ -169,7 +169,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @keyframes blink { to { visibility: hidden; } }
 [data-timecode] { font-variant-numeric: tabular-nums; color: var(--ink); }
 .hero-in { padding-bottom: clamp(24px, 3vw, 40px); }
-.hero-h { font-size: clamp(60px, 11.6vw, 210px); line-height: .82; margin: 0 0 clamp(24px, 3vw, 40px); }
+.hero-h { font-size: clamp(56px, 11.2vw, 172px); line-height: .82; margin: 0 0 clamp(24px, 3vw, 40px); }
 .hero-h span { display: block; }
 .hero-row { display: grid; grid-template-columns: 1fr auto; gap: 24px 48px; align-items: center; border-top: 1px solid rgba(246, 241, 233, .16); padding-top: clamp(20px, 2.4vw, 32px); }
 .hero-row .lede { margin: 0; color: #d6cdc0; max-width: 44ch; }
