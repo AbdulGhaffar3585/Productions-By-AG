@@ -1,4 +1,4 @@
-// Vercel serverless function: receives the contact form and emails it via Resend.
+// Vercel serverless function: receives the /start brief and the /contact note and emails them via Resend.
 //
 // Setup (one time, in Vercel → Project → Settings → Environment Variables):
 //   RESEND_API_KEY  — from resend.com (free tier is plenty)
@@ -21,19 +21,22 @@ module.exports = async (req, res) => {
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
 
-  const isForm = String(req.headers['content-type'] || '').includes('application/x-www-form-urlencoded');
-  const reply = (status, payload) => {
-    if (isForm) {
-      res.setHeader('Location', payload.ok ? '/contact?sent=1' : '/contact?error=1');
-      return res.status(303).end();
-    }
-    return res.status(status).json(payload);
-  };
-
   let b = req.body || {};
   if (typeof b === 'string') {
     try { b = JSON.parse(b); } catch { b = Object.fromEntries(new URLSearchParams(b)); }
   }
+
+  // Two forms post here: /start (kind=project, the brief) and /contact (kind=general).
+  const isProject = b.kind !== 'general';
+  const page = isProject ? '/start' : '/contact';
+  const isForm = String(req.headers['content-type'] || '').includes('application/x-www-form-urlencoded');
+  const reply = (status, payload) => {
+    if (isForm) {
+      res.setHeader('Location', payload.ok ? `${page}?sent=1` : `${page}?error=1`);
+      return res.status(303).end();
+    }
+    return res.status(status).json(payload);
+  };
 
   // Honeypot: bots fill the hidden "website" field. Pretend success.
   if (b.website) return reply(200, { ok: true });
@@ -53,15 +56,13 @@ module.exports = async (req, res) => {
   const key = process.env.RESEND_API_KEY;
   if (!key) return reply(503, { ok: false, error: 'not_configured' });
 
-  const text = [
-    `Name: ${d.name}`,
-    `Email: ${d.email}`,
-    `Company: ${d.company || '-'}`,
-    `Project type: ${d.type || '-'}`,
-    `Timeline: ${d.timeline || '-'}`,
-    '',
-    d.message,
-  ].join('\n');
+  const text = (isProject
+    ? [`Name: ${d.name}`, `Email: ${d.email}`, `Company: ${d.company || '-'}`, `Project type: ${d.type || '-'}`, `Timeline: ${d.timeline || '-'}`]
+    : [`Name: ${d.name}`, `Email: ${d.email}`]
+  ).concat(['', d.message]).join('\n');
+  const subject = isProject
+    ? `New project brief — ${d.type || 'Project'} — ${d.name}`
+    : `New message — ${d.name}`;
 
   try {
     const r = await fetch('https://api.resend.com/emails', {
@@ -71,7 +72,7 @@ module.exports = async (req, res) => {
         from: FROM,
         to: [TO],
         reply_to: d.email,
-        subject: `New enquiry — ${d.type || 'Project'} — ${d.name}`,
+        subject,
         text,
       }),
     });

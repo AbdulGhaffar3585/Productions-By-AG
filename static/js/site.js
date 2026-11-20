@@ -1,5 +1,6 @@
 (() => {
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const vimeo = (id, q) => `https://player.vimeo.com/video/${id}?${q}&dnt=1`;
 
   // ---- nav: solid background after scrolling, mobile menu
   const nav = document.querySelector('.nav');
@@ -8,17 +9,18 @@
   addEventListener('scroll', onScroll, { passive: true });
 
   const toggle = document.querySelector('.nav-toggle');
+  const toggleText = toggle && toggle.querySelector('.nav-toggle-text');
   const menu = document.getElementById('menu');
   const setMenu = (open) => {
     toggle.setAttribute('aria-expanded', String(open));
-    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    if (toggleText) toggleText.textContent = open ? 'Close' : 'Menu';
     menu.hidden = !open;
     document.body.classList.toggle('menu-open', open);
   };
   if (toggle && menu) {
     toggle.addEventListener('click', () => setMenu(menu.hidden));
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { setMenu(false); toggle.focus(); } });
-    matchMedia('(min-width: 861px)').addEventListener('change', (m) => m.matches && setMenu(false));
+    matchMedia('(min-width: 921px)').addEventListener('change', (m) => m.matches && setMenu(false));
   }
 
   // ---- hero showreel: muted Vimeo background loop, loaded after the page
@@ -27,7 +29,7 @@
   if (bg && !reduceMotion && !saveData) {
     addEventListener('load', () => {
       const f = document.createElement('iframe');
-      f.src = `https://player.vimeo.com/video/${bg.dataset.vimeoBg}?background=1&autoplay=1&loop=1&muted=1&dnt=1`;
+      f.src = vimeo(bg.dataset.vimeoBg, 'background=1&autoplay=1&loop=1&muted=1');
       f.title = 'Showreel';
       f.allow = 'autoplay; fullscreen; picture-in-picture';
       f.setAttribute('aria-hidden', 'true');
@@ -37,11 +39,40 @@
     });
   }
 
+  // ---- hero timecode (25 fps), purely decorative
+  const tc = document.querySelector('[data-timecode]');
+  if (tc && !reduceMotion) {
+    const t0 = performance.now();
+    const pad = (n) => String(n).padStart(2, '0');
+    const tick = (now) => {
+      const f = Math.floor((now - t0) / 40);
+      tc.textContent = `${pad(Math.floor(f / 90000) % 24)}:${pad(Math.floor(f / 1500) % 60)}:${pad(Math.floor(f / 25) % 60)}:${pad(f % 25)}`;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  // ---- full showreel with sound, in a dialog
+  const reel = document.getElementById('reel');
+  const reelBtn = document.querySelector('[data-reel]');
+  if (reel && reelBtn && typeof reel.showModal === 'function') {
+    const frame = reel.querySelector('.reel-frame');
+    reelBtn.addEventListener('click', () => {
+      frame.innerHTML = `<iframe src="${vimeo(reelBtn.dataset.reel, 'autoplay=1&title=0&byline=0&portrait=0')}" title="Showreel" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+      reel.showModal();
+    });
+    reel.querySelector('[data-reel-close]').addEventListener('click', () => reel.close());
+    reel.addEventListener('click', (e) => { if (e.target === reel) reel.close(); });
+    reel.addEventListener('close', () => { frame.innerHTML = ''; reelBtn.focus(); });
+  } else if (reelBtn) {
+    reelBtn.addEventListener('click', () => { location.href = `https://vimeo.com/${reelBtn.dataset.reel}`; });
+  }
+
   // ---- click-to-play Vimeo films (no player weight until asked)
   document.querySelectorAll('.facade[data-vimeo]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const f = document.createElement('iframe');
-      f.src = `https://player.vimeo.com/video/${btn.dataset.vimeo}?autoplay=1&title=0&byline=0&portrait=0&dnt=1`;
+      f.src = vimeo(btn.dataset.vimeo, 'autoplay=1&title=0&byline=0&portrait=0');
       f.title = btn.getAttribute('aria-label').replace(/^Play /, '');
       f.allow = 'autoplay; fullscreen; picture-in-picture';
       f.allowFullscreen = true;
@@ -67,34 +98,42 @@
     }));
   }
 
-  // ---- contact form
-  const form = document.getElementById('contact-form');
-  if (form) {
+  // ---- forms: /start (project brief) and /contact (general note)
+  const email = document.querySelector('[data-email]')?.textContent.trim() || '';
+  document.querySelectorAll('form[data-kind]').forEach((form) => {
+    const isProject = form.dataset.kind === 'project';
     const status = form.querySelector('.form-status');
-    const email = document.querySelector('.direct-email')?.textContent.trim() || '';
+    const thanks = isProject
+      ? 'Thank you — your brief is in. I\'ll reply within two working days.'
+      : 'Thank you — message received. I\'ll get back to you soon.';
     const say = (html, cls) => { status.innerHTML = html; status.className = `form-status ${cls || ''}`; };
 
-    const params = new URLSearchParams(location.search);
-    if (params.has('sent')) { form.classList.add('sent'); say('Thank you — your brief is in. I\'ll reply within two working days.', 'ok'); }
+    if (new URLSearchParams(location.search).has('sent')) { form.classList.add('sent'); say(thanks, 'ok'); }
 
     const mailto = (d) => {
-      const body = `Name: ${d.name}\nCompany: ${d.company || '-'}\nProject type: ${d.type}\nTimeline: ${d.timeline}\n\n${d.message}`;
-      return `mailto:${email}?subject=${encodeURIComponent(`Project enquiry — ${d.type || 'New project'}`)}&body=${encodeURIComponent(body)}`;
+      const body = isProject
+        ? `Name: ${d.name}\nCompany: ${d.company || '-'}\nProject type: ${d.type}\nTimeline: ${d.timeline}\n\n${d.message}`
+        : `Name: ${d.name}\n\n${d.message}`;
+      const subject = isProject ? `Project enquiry — ${d.type || 'New project'}` : `Hello from ${d.name}`;
+      return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     };
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const d = Object.fromEntries(new FormData(form));
+      const fieldset = form.querySelector('fieldset');
       let bad = null;
       form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
-      form.querySelector('fieldset').classList.remove('fieldset-invalid');
+      if (fieldset) fieldset.classList.remove('fieldset-invalid');
       const need = (name, ok) => { if (!ok) { const el = form.elements[name]; if (el && el.setAttribute) el.setAttribute('aria-invalid', 'true'); bad = bad || name; } };
       need('name', d.name && d.name.trim());
       need('email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email || ''));
-      if (!d.type) { form.querySelector('fieldset').classList.add('fieldset-invalid'); bad = bad || 'type'; }
+      if (isProject && !d.type) { fieldset.classList.add('fieldset-invalid'); bad = bad || 'type'; }
       need('message', d.message && d.message.trim().length > 9);
       if (bad) {
-        say('Please fill in the highlighted fields — name, a valid email, project type, and a few lines about the project.', 'err');
+        say(isProject
+          ? 'Please fill in the highlighted fields — name, a valid email, project type, and a few lines about the project.'
+          : 'Please add your name, a valid email, and a short message.', 'err');
         const el = bad === 'type' ? form.querySelector('input[name=type]') : form.elements[bad];
         el && el.focus();
         return;
@@ -108,13 +147,13 @@
         const j = await r.json().catch(() => ({}));
         if (!r.ok || !j.ok) throw new Error(j.error || r.status);
         form.classList.add('sent');
-        say('Thank you — your brief is in. I\'ll reply within two working days.', 'ok');
+        say(thanks, 'ok');
       } catch (err) {
         btn.disabled = false;
         say(`The form couldn't send just now. <a href="${mailto(d)}">Send it by email instead</a> — your message is already filled in.`, 'err');
       }
     });
-  }
+  });
 
   // ---- gentle reveal on scroll
   const items = document.querySelectorAll('[data-reveal]');

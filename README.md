@@ -29,9 +29,10 @@ Then open http://localhost:4173
 | `content.py` | All site text and project data |
 | `build.py` | Turns `content.py` into HTML pages |
 | `static/css/site.css` | Styles |
-| `static/js/site.js` | Menu, video players, work filters, contact form |
+| `static/js/site.js` | Menu, showreel player, video players, work filters, both forms |
+| `static/brand/` | Logo files — AG mark (SVG, dark and light) and full lockups (PNG) |
 | `static/img/` | Images (JPEG, ~1600px wide max) |
-| `api/contact.js` | Vercel function that emails contact-form enquiries |
+| `api/contact.js` | Vercel function that emails both forms to you |
 | `public/` | Generated site — don't edit by hand |
 
 ## Adding a project image or stills
@@ -41,12 +42,21 @@ Then open http://localhost:4173
 3. For a stills gallery: `"stills": [{"img": "scil-school-1", "alt": "Classroom, morning light"}]`.
 4. For a film: add `{"vimeo": "123456789", "title": "...", "note": "...", "poster": "file.jpg"}` to `"films"`.
 
-## Contact form email
+## Brand
 
-The form posts to `/api/contact`, which sends via [Resend](https://resend.com).
+- **Logo:** the AG monogram — the A's crossbar runs on as the G's bar, and the red counter in the A doubles as a play / REC mark. Files are in `static/brand/`.
+- **Colours:** paper `#EEEAE2`, ink `#141312`, night `#121110`, safelight red `#D63A20`.
+- **Type:** Instrument Serif (headlines), Inter Tight (text), JetBrains Mono (labels) — all free on Google Fonts.
+
+## The two forms
+
+- **Start a project** (`/start`) — the project brief: type, timeline, details.
+- **Contact** (`/contact`) — email, socials, and a short general note.
+
+Both post to `/api/contact`, which sends via [Resend](https://resend.com).
 In Vercel → Project → Settings → Environment Variables add:
 
 - `RESEND_API_KEY` — your Resend API key
 - `CONTACT_TO` — optional, defaults to productionbyag@gmail.com
 
-Until the key is set, the form shows a one-click "send by email instead" link with the message pre-filled, so no enquiry is lost.
+Until the key is set, each form shows a one-click "send by email instead" link with the message pre-filled, so no enquiry is lost.

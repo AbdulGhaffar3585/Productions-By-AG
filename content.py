@@ -21,19 +21,22 @@ SITE = {
     "showreel_vimeo": "1197639477",
 }
 
+# Main menu. "Start a project" (/start) is the button beside it — the project
+# brief form. "Contact" (/contact) is for everything else: a quick hello,
+# press, collaborations, or just finding the email address.
 NAV = [
     ("Work", "/work"),
-    ("About", "/about"),
     ("Services", "/services"),
+    ("About", "/about"),
+    ("Collaborations", "/collaborations"),
     ("Contact", "/contact"),
 ]
 
 FOOTER_NAV = [
     ("Work", "/work"),
-    ("About", "/about"),
     ("Services", "/services"),
+    ("About", "/about"),
     ("Collaborations", "/collaborations"),
-    ("Contact", "/contact"),
 ]
 
 # ---------------------------------------------------------------- Home
@@ -48,6 +51,12 @@ HOME = {
     "featured": ["alkhidmat", "total-parco", "care-pharmacy", "tedx-gcu"],
     "trusted_heading": "Trusted alongside.",
     "trusted": ["Sony", "Nikon", "Sigma", "Insta360", "Hollyland", "TEDx GCU", "Alkhidmat Foundation"],
+    # Big statement under the hero. Words between *asterisks* are set in red italic.
+    "statement": (
+        "I'm Abdul Ghaffar — *a filmmaker and photographer in Lahore.* Six years and more "
+        "than fifty documentaries in, I still work the same way: stay with a real person and "
+        "a real story long enough to find what's actually there."
+    ),
     "about_heading": "The person behind the work.",
     "about_text": (
         "I'm Abdul Ghaffar — a filmmaker and photographer in Lahore. Six years and more than "
@@ -394,9 +403,16 @@ COLLAB_GROUPS = [
 
 # ---------------------------------------------------------------- Contact
 
-CONTACT = {
+# /start — the project brief form
+START = {
     "heading": "Tell me about what you're making.",
-    "subhead": "I respond to every enquiry within two working days. The first call is 30 minutes — you talk, I listen.",
+    "subhead": "A few details about the project and I'll come back within two working days. The first call is 30 minutes — you talk, I listen.",
+}
+
+# /contact — general enquiries
+CONTACT = {
+    "heading": "Say hello.",
+    "subhead": "Questions, collaborations, press, or just a quick hello — write to me directly or leave a note below.",
     "project_types": ["Brand film", "Founder story", "Documentary", "Social content retainer", "Event / photography", "Something else"],
     "timelines": ["Flexible", "Within a month", "1–3 months", "3+ months"],
     "hours": "Monday – Friday · 10:00 – 18:00 PKT",
