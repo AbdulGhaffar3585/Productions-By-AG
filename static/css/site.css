@@ -180,7 +180,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
     linear-gradient(0deg, rgba(18,17,16,.95) 0%, rgba(18,17,16,.55) 40%, rgba(18,17,16,.05) 75%);
 }
 .hero-in { padding-top: calc(var(--nav-h) + 80px); padding-bottom: clamp(28px, 4vw, 48px); }
-.hero-h { max-width: 13ch; font-size: clamp(56px, 10vw, 176px); margin-bottom: clamp(24px, 3vw, 40px); }
+.hero-h { max-width: 15.5ch; font-size: clamp(56px, 10vw, 176px); margin-bottom: clamp(24px, 3vw, 40px); }
 .hero-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap; }
 .hero-row .lede { margin: 0; color: rgba(238, 234, 226, .82); max-width: 46ch; }
 .rec { display: inline-flex; align-items: center; gap: 10px; color: rgba(238, 234, 226, .8); }
