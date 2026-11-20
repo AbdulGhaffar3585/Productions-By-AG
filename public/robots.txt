@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://productions-by-ag.vercel.app/sitemap.xml
