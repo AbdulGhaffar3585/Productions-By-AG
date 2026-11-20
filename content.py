@@ -51,11 +51,11 @@ HOME = {
     "featured": ["alkhidmat", "total-parco", "care-pharmacy", "tedx-gcu"],
     "trusted_heading": "Trusted alongside.",
     "trusted": ["Sony", "Nikon", "Sigma", "Insta360", "Hollyland", "TEDx GCU", "Alkhidmat Foundation"],
-    # Big statement under the hero. Words between *asterisks* are set in red italic.
-    "statement": (
-        "I'm Abdul Ghaffar — *a filmmaker and photographer in Lahore.* Six years and more "
-        "than fifty documentaries in, I still work the same way: stay with a real person and "
-        "a real story long enough to find what's actually there."
+    # The "Hello" intro beside the portrait on the home page.
+    "intro": (
+        "A filmmaker and photographer in Lahore. Six years and more than fifty documentaries "
+        "in, I still work the same way: stay with a real person and a real story long enough "
+        "to find what's actually there — then make the film that does it justice."
     ),
     "about_heading": "The person behind the work.",
     "about_text": (

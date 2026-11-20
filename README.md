@@ -30,7 +30,7 @@ Then open http://localhost:4173
 | `build.py` | Turns `content.py` into HTML pages |
 | `static/css/site.css` | Styles |
 | `static/js/site.js` | Menu, showreel player, video players, work filters, both forms |
-| `static/brand/` | Logo files — AG mark (SVG, dark and light) and full lockups (PNG) |
+| `static/brand/` | Logo files — AG mark (SVG, dark and light) and full lockups (PNG, dark and light) |
 | `static/img/` | Images (JPEG, ~1600px wide max) |
 | `api/contact.js` | Vercel function that emails both forms to you |
 | `public/` | Generated site — don't edit by hand |
@@ -44,9 +44,9 @@ Then open http://localhost:4173
 
 ## Brand
 
-- **Logo:** the AG monogram — the A's crossbar runs on as the G's bar, and the red counter in the A doubles as a play / REC mark. Files are in `static/brand/`.
-- **Colours:** paper `#EEEAE2`, ink `#141312`, night `#121110`, safelight red `#D63A20`.
-- **Type:** Instrument Serif (headlines), Inter Tight (text), JetBrains Mono (labels) — all free on Google Fonts.
+- **Logo:** the AG monogram — the A's crossbar runs on as the G's bar, and the amber counter in the A doubles as a play / REC mark. Files are in `static/brand/`.
+- **Colours:** cinema black `#0C0A08`, warm white `#F6F1E9`, film-light amber `#F0A35A`.
+- **Type:** Archivo (extra-condensed 800 for headlines, regular for text) and Geist Mono (labels) — free on Google Fonts.
 
 ## The two forms
 

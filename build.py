@@ -39,7 +39,7 @@ PLAY = '<svg class="play-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 
 # The red counter in the A doubles as a play / REC mark. Defined once per page.
 MARK_SYMBOL = '''<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <clipPath id="ag-feet"><rect x="0" y="0" width="160" height="92"/></clipPath>
-<symbol id="ag-mark" viewBox="3 8 150 84"><g fill="none" stroke="currentColor" stroke-width="8"><path clip-path="url(#ag-feet)" d="M5 100L35 20L65 100" stroke-miterlimit="10"/><path d="M136.87 23.13A38 38 0 1 0 146.66 60H20"/></g><path d="M35 39L40 53H30Z" fill="#d63a20"/></symbol>
+<symbol id="ag-mark" viewBox="3 8 150 84"><g fill="none" stroke="currentColor" stroke-width="8"><path clip-path="url(#ag-feet)" d="M5 100L35 20L65 100" stroke-miterlimit="10"/><path d="M136.87 23.13A38 38 0 1 0 146.66 60H20"/></g><path d="M35 39L40 53H30Z" fill="#f0a35a"/></symbol>
 </defs></svg>'''
 MARK = '<svg class="mark" aria-hidden="true"><use href="#ag-mark"/></svg>'
 
@@ -132,11 +132,11 @@ def film(f, vertical=False):
 
 def section_head(lbl, heading, sub="", h="h2"):
     sub_html = f'<p class="sec-sub">{e(sub)}</p>' if sub else ""
-    return f'<div class="sec-head" data-reveal>{label(lbl)}<{h} class="h2">{heading}</{h}>{sub_html}</div>'
+    return f'<div class="sec-head" data-reveal><div>{label(lbl)}<{h} class="h2">{heading}</{h}></div>{sub_html}</div>'
 
 
 def cta_band(heading=None, line=None):
-    return f'''<section class="cta dark">
+    return f'''<section class="cta">
   <div class="shell cta-in" data-reveal>
     <div>
       {label("Start a project")}
@@ -199,7 +199,7 @@ def layout(path, title, description, body, page_class="", og_image="/og.jpg", js
 <title>{e(full_title)}</title>
 <meta name="description" content="{e(description)}">
 <link rel="canonical" href="{canonical}">
-<meta name="theme-color" content="#121110">
+<meta name="theme-color" content="#0c0a08">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{e(SITE["name"])}">
 <meta property="og:title" content="{e(full_title)}">
@@ -211,7 +211,7 @@ def layout(path, title, description, body, page_class="", og_image="/og.jpg", js
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Geist+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="/css/site.css?v={CSS_V}">
 <script>document.documentElement.classList.add('js')</script>
 {ld}
@@ -226,7 +226,7 @@ def layout(path, title, description, body, page_class="", og_image="/og.jpg", js
     <a class="btn btn-red btn-sm nav-cta" href="/start"><span>Start a project</span>{ARROW}</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="menu"><span class="nav-toggle-text">Menu</span><span class="bars"><span></span><span></span></span></button>
   </div>
-  <div class="menu dark" id="menu" hidden>
+  <div class="menu" id="menu" hidden>
     <nav class="shell menu-links" aria-label="Mobile">{menu}</nav>
     <div class="shell menu-foot">
       {btn("Start a project", "/start")}
@@ -237,7 +237,7 @@ def layout(path, title, description, body, page_class="", og_image="/og.jpg", js
 <main id="main">
 {body}
 </main>
-<footer class="foot dark">
+<footer class="foot">
   <div class="shell">
     <div class="foot-top">
       <div>
@@ -270,84 +270,116 @@ def layout(path, title, description, body, page_class="", og_image="/og.jpg", js
 
 def home():
     H = C.HOME
-    h1 = f'{e(H["headline"][0])} {e(H["headline"][1])} <em>{e(H["headline"][2])}</em>'
+    lines = [e(H["headline"][0]), e(H["headline"][1]), f'<em>{e(H["headline"][2])}</em>']
+    h1 = "".join(f"<span>{l}</span>" for l in lines)
     disciplines = "".join(
         f'<a class="disc" href="/services#{d["id"]}" data-reveal><span class="idx">{num(i)}</span>'
         f'<strong>{e(d["name"])}</strong><span class="muted">{e(d["line"])}</span>{ARROW}</a>'
         for i, d in enumerate(C.DISCIPLINES, 1))
 
-    features = ""
-    for i, slug in enumerate(H["featured"], 1):
-        p = project(slug)
-        features += f'''<article class="feature" data-reveal>
-  <a class="feature-media" href="/work/{p["slug"]}" tabindex="-1" aria-hidden="true">{cover(p, "(min-width: 860px) 58vw, 100vw")}</a>
-  <div class="feature-text">
-    <span class="feature-no">{num(i)}</span>
-    {label(f'{p["type"]} · {p["year"]} · {p["role"]}')}
-    <h3 class="feature-title"><a href="/work/{p["slug"]}">{e(p["client"])}</a></h3>
-    <p class="muted">{e(p["short"])}</p>
-    <a class="link" href="/work/{p["slug"]}" tabindex="-1">View the project {ARROW}</a>
+    featured = [project(s) for s in H["featured"]]
+    panels = ""
+    for i, p in enumerate(featured, 1):
+        panels += f"""<a class="panel" href="/work/{p["slug"]}">
+  {cover(p, "100vw")}
+  <div class="panel-shade"></div>
+  <div class="shell panel-top"><span class="label">{num(i)} / {num(len(featured))}</span><span class="label">{e(p["type"])} · {e(p["year"])}</span></div>
+  <div class="shell panel-info">
+    <h3 class="panel-title">{e(p["client"])}</h3>
+    <div class="panel-row"><p>{e(p["short"])} — {e(p["role"])}</p><span class="panel-cta">View project {ARROW}</span></div>
   </div>
-</article>'''
+</a>"""
 
+    def peek_img(p):
+        if not p.get("cover"):
+            return ""
+        small = IMG / f'{p["cover"]}-sm.jpg'
+        return f' data-img="/img/{p["cover"]}{"-sm" if small.exists() else ""}.jpg"'
+    index = "".join(
+        f'<a href="/work/{p["slug"]}"{peek_img(p)}><span class="idx">{num(i)}</span><strong>{e(p["client"])}</strong>'
+        f'<span class="muted">{e(p["type"])} — {e(p["short"])}</span><span class="label yr">{e(p["year"])}</span>{ARROW}</a>'
+        for i, p in enumerate(C.PROJECTS, 1))
+
+    stats = {k: (v, sub) for k, v, sub in C.ABOUT["stats"]}
+    facts = "".join(f"<div><strong>{e(v)}</strong><span>{e(t)}</span></div>" for v, t in [
+        (stats["Docs"][0], "Documentaries for Alkhidmat"),
+        (stats["Years"][0], "Years in film & content"),
+        (stats["Since"][0], "First commission"),
+    ])
     names = "".join(f"<li>{e(n)}</li>" for n in H["trusted"])
+    ring = "PLAY SHOWREEL · " * 3
 
     body = f'''
-<section class="hero dark">
+<section class="hero">
   <div class="hero-media" data-vimeo-bg="{SITE["showreel_vimeo"]}">
     <img src="/img/hero-poster.jpg" alt="" fetchpriority="high" width="1280" height="720">
   </div>
   <div class="hero-shade"></div>
-  <div class="shell hero-in">
+  <div class="shell hero-top">
     <p class="label rec"><span class="rec-dot"></span>Showreel · {SITE["year"]}</p>
+    <p class="label">Lahore, Pakistan · Brand · Documentary · Social · Photography</p>
+    <p class="label" data-timecode>00:00:00:00</p>
+  </div>
+  <div class="shell hero-in">
     <h1 class="display hero-h">{h1}</h1>
     <div class="hero-row">
       <p class="lede">{e(H["subhead"])}</p>
       <div class="actions">
-        <button class="btn btn-red" type="button" data-reel="{SITE["showreel_vimeo"]}"><span>Watch the showreel</span>{PLAY}</button>
+        <button class="reel-btn" type="button" data-reel="{SITE["showreel_vimeo"]}" aria-label="Play the showreel">
+          <svg class="ring" viewBox="0 0 128 128" aria-hidden="true"><defs><path id="reel-path" d="M64 64m-54 0a54 54 0 1 1 108 0a54 54 0 1 1-108 0"/></defs><text><textPath href="#reel-path" textLength="336" lengthAdjust="spacing">{ring}</textPath></text></svg>
+          <span class="core">{PLAY}</span>
+        </button>
         {btn("View work", "/work", "line")}
       </div>
     </div>
   </div>
-  <p class="label hero-meta shell"><span>Lahore, Pakistan</span><span>Brand · Documentary · Social · Photography</span><span>Scroll ↓</span><span data-timecode>00:00:00:00</span></p>
 </section>
 
 <section class="intro">
   <div class="shell intro-grid">
-    <p class="label">What I make</p>
-    <div data-reveal>
-      <p class="statement">{stars(H["statement"])}</p>
+    <figure class="viewfinder" data-reveal>
+      {img("abdul-ghaffar", "Abdul Ghaffar, filmmaker and photographer", "(min-width: 900px) 40vw, 100vw")}
+      <div class="vf-ui" aria-hidden="true">
+        <span class="c c1"></span><span class="c c2"></span><span class="c c3"></span><span class="c c4"></span>
+        <span class="rec"><span class="rec-dot"></span>&nbsp; REC</span>
+        <span class="tc" data-timecode>00:00:00:00</span>
+        <span class="cross"></span>
+        <span class="meta"><span>Abdul Ghaffar</span><span>Lahore, PK</span></span>
+      </div>
+    </figure>
+    <div class="intro-text" data-reveal>
+      {label("Hello — nice to meet you")}
+      <h2 class="h2">I'm Abdul <em>Ghaffar.</em></h2>
+      <p class="lede">{e(H["intro"])}</p>
+      <div class="facts">{facts}</div>
+      <div class="actions">{btn("More about me", "/about")}{btn("Start a project", "/start", "line")}</div>
     </div>
   </div>
   <div class="shell"><div class="disc-list">{disciplines}</div></div>
 </section>
 
-<section class="section">
-  <div class="shell">
-    {section_head("Selected work", italic_last(H["featured_heading"]))}
-    <div class="features">{features}</div>
-    <div class="sec-foot">{btn("See all work", "/work", "ink")}</div>
+<section class="work-head">
+  <div class="shell sec-head" data-reveal>
+    <div>{label("Selected work")}<h2 class="h2">{italic_last(H["featured_heading"])}</h2></div>
+    <a class="link" href="/work">All work {ARROW}</a>
   </div>
 </section>
+<div class="panels">{panels}</div>
 
-<section class="trusted dark" aria-label="{e(H["trusted_heading"])}">
+<section class="section">
+  <div class="shell">
+    <div class="sec-head" data-reveal><div>{label("Index")}<h2 class="h2">Every <em>project.</em></h2></div><p class="sec-sub">Brand films, founder stories, documentaries and events — hover for a frame, click for the full story.</p></div>
+    <nav class="index" aria-label="All projects" data-peek>{index}</nav>
+  </div>
+</section>
+<div class="peek" aria-hidden="true"><img alt=""></div>
+
+<section class="trusted" aria-label="{e(H["trusted_heading"])}">
   <div class="shell trusted-head">
     {label(H["trusted_heading"])}
     <a class="link" href="/collaborations">All collaborations {ARROW}</a>
   </div>
   <div class="marquee"><ul>{names}</ul><ul aria-hidden="true">{names}</ul></div>
-</section>
-
-<section class="section">
-  <div class="shell about-teaser">
-    <figure class="portrait" data-reveal>{img("abdul-ghaffar", "Abdul Ghaffar, filmmaker", "(min-width: 900px) 40vw, 100vw")}<figcaption class="label"><span>Abdul Ghaffar</span><span>Lahore</span></figcaption></figure>
-    <div data-reveal>
-      {label("About")}
-      <h2 class="h2">{italic_last(H["about_heading"])}</h2>
-      <p class="lede">Filmmaker, editor and photographer. More than fifty documentaries for Alkhidmat Foundation, brand films for companies across Pakistan, and partnerships with Sony, Nikon, Sigma, Insta360 and Hollyland.</p>
-      {btn("About me", "/about", "line")}
-    </div>
-  </div>
 </section>
 {cta_band()}'''
     jsonld = {

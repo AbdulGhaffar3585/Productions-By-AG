@@ -39,17 +39,41 @@
     });
   }
 
-  // ---- hero timecode (25 fps), purely decorative
-  const tc = document.querySelector('[data-timecode]');
-  if (tc && !reduceMotion) {
+  // ---- running timecodes (25 fps), purely decorative
+  const tcs = document.querySelectorAll('[data-timecode]');
+  if (tcs.length && !reduceMotion) {
     const t0 = performance.now();
     const pad = (n) => String(n).padStart(2, '0');
     const tick = (now) => {
       const f = Math.floor((now - t0) / 40);
-      tc.textContent = `${pad(Math.floor(f / 90000) % 24)}:${pad(Math.floor(f / 1500) % 60)}:${pad(Math.floor(f / 25) % 60)}:${pad(f % 25)}`;
+      const txt = `${pad(Math.floor(f / 90000) % 24)}:${pad(Math.floor(f / 1500) % 60)}:${pad(Math.floor(f / 25) % 60)}:${pad(f % 25)}`;
+      tcs.forEach((el) => { el.textContent = txt; });
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
+  }
+
+  // ---- project index: a frame follows the cursor
+  const peek = document.querySelector('.peek');
+  const list = document.querySelector('[data-peek]');
+  if (peek && list && matchMedia('(hover: hover)').matches) {
+    const pic = peek.querySelector('img');
+    let x = 0, y = 0, px = 0, py = 0, raf = 0;
+    const follow = () => {
+      px += (x - px) * 0.18; py += (y - py) * 0.18;
+      peek.style.left = `${px}px`; peek.style.top = `${py}px`;
+      raf = Math.abs(x - px) + Math.abs(y - py) > 0.5 ? requestAnimationFrame(follow) : 0;
+    };
+    list.addEventListener('mousemove', (e) => { x = Math.min(e.clientX + 320, innerWidth - 200); y = e.clientY; if (!raf) raf = requestAnimationFrame(follow); });
+    list.querySelectorAll('a').forEach((a) => {
+      a.addEventListener('mouseenter', (e) => {
+        if (!a.dataset.img) { peek.classList.remove('on'); return; }
+        if (!peek.classList.contains('on')) { px = x = Math.min(e.clientX + 320, innerWidth - 200); py = y = e.clientY; }
+        pic.src = a.dataset.img;
+        peek.classList.add('on');
+      });
+    });
+    list.addEventListener('mouseleave', () => peek.classList.remove('on'));
   }
 
   // ---- full showreel with sound, in a dialog
