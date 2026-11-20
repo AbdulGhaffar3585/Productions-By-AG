@@ -1,6 +1,6 @@
 # Productions by AG — portfolio site
 
-Live: https://productions-by-ag.vercel.app
+Live: https://productionsbyag.vercel.app
 
 A fast, static site. No frameworks, no `npm install` — just Python (already on every Mac) to build it.
 

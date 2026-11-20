@@ -7,7 +7,7 @@ That regenerates the finished site in the `public/` folder.
 
 SITE = {
     "name": "Productions by AG",
-    "url": "https://productions-by-ag.vercel.app",
+    "url": "https://productionsbyag.vercel.app",
     "tagline": "Films, documentaries, and visual stories — Lahore.",
     "description": (
         "Abdul Ghaffar is a Lahore-based filmmaker crafting brand films, founder "
