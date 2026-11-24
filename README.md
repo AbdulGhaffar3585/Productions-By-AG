@@ -42,11 +42,9 @@ Then open http://localhost:4173
 3. For a stills gallery: `"stills": [{"img": "scil-school-1", "alt": "Classroom, morning light"}]`.
 4. For a film: add `{"vimeo": "123456789", "title": "...", "note": "...", "poster": "file.jpg"}` to `"films"`.
 
-## Brand
+## Visual design
 
-- **Logo:** the AG monogram — the A's crossbar runs on as the G's bar, and the amber counter in the A doubles as a play / REC mark. Files are in `static/brand/`.
-- **Colours:** cinema black `#0C0A08`, warm white `#F6F1E9`, film-light amber `#F0A35A`.
-- **Type:** Archivo (extra-condensed 800 for headlines, regular for text) and Geist Mono (labels) — free on Google Fonts.
+The homepage uses a layered CSS camera lens. Pointer movement changes the viewing angle. The Lens spacing control moves the rings along their optical axis and supports touch and keyboard input. Automatic motion follows the visitor's reduced-motion preference. Typography uses DM Sans, Georgia and IBM Plex Mono.
 
 ## The two forms
 

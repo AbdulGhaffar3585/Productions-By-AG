@@ -23,57 +23,26 @@
     matchMedia('(min-width: 921px)').addEventListener('change', (m) => m.matches && setMenu(false));
   }
 
-  // ---- hero showreel: muted Vimeo background loop, loaded after the page
-  const bg = document.querySelector('[data-vimeo-bg]');
-  const saveData = navigator.connection && navigator.connection.saveData;
-  if (bg && !reduceMotion && !saveData) {
-    addEventListener('load', () => {
-      const f = document.createElement('iframe');
-      f.src = vimeo(bg.dataset.vimeoBg, 'background=1&autoplay=1&loop=1&muted=1');
-      f.title = 'Showreel';
-      f.allow = 'autoplay; fullscreen; picture-in-picture';
-      f.setAttribute('aria-hidden', 'true');
-      f.tabIndex = -1;
-      f.addEventListener('load', () => setTimeout(() => f.classList.add('on'), 900));
-      bg.appendChild(f);
+  // The focus control works with touch and keyboard. Pointer tilt is optional.
+  const optics = document.querySelector('.optics');
+  if (optics) {
+    const slider = optics.querySelector('input');
+    slider.addEventListener('input', () => {
+      optics.style.setProperty('--step', `${4 + Number(slider.value) * 0.12}px`);
     });
-  }
-
-  // ---- running timecodes (25 fps), purely decorative
-  const tcs = document.querySelectorAll('[data-timecode]');
-  if (tcs.length && !reduceMotion) {
-    const t0 = performance.now();
-    const pad = (n) => String(n).padStart(2, '0');
-    const tick = (now) => {
-      const f = Math.floor((now - t0) / 40);
-      const txt = `${pad(Math.floor(f / 90000) % 24)}:${pad(Math.floor(f / 1500) % 60)}:${pad(Math.floor(f / 25) % 60)}:${pad(f % 25)}`;
-      tcs.forEach((el) => { el.textContent = txt; });
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }
-
-  // ---- project index: a frame follows the cursor
-  const peek = document.querySelector('.peek');
-  const list = document.querySelector('[data-peek]');
-  if (peek && list && matchMedia('(hover: hover)').matches) {
-    const pic = peek.querySelector('img');
-    let x = 0, y = 0, px = 0, py = 0, raf = 0;
-    const follow = () => {
-      px += (x - px) * 0.18; py += (y - py) * 0.18;
-      peek.style.left = `${px}px`; peek.style.top = `${py}px`;
-      raf = Math.abs(x - px) + Math.abs(y - py) > 0.5 ? requestAnimationFrame(follow) : 0;
-    };
-    list.addEventListener('mousemove', (e) => { x = Math.min(e.clientX + 320, innerWidth - 200); y = e.clientY; if (!raf) raf = requestAnimationFrame(follow); });
-    list.querySelectorAll('a').forEach((a) => {
-      a.addEventListener('mouseenter', (e) => {
-        if (!a.dataset.img) { peek.classList.remove('on'); return; }
-        if (!peek.classList.contains('on')) { px = x = Math.min(e.clientX + 320, innerWidth - 200); py = y = e.clientY; }
-        pic.src = a.dataset.img;
-        peek.classList.add('on');
-      });
+    const tilt = matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)');
+    optics.addEventListener('pointermove', (event) => {
+      if (!tilt.matches) return;
+      const rect = optics.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width - 0.5;
+      const y = (event.clientY - rect.top) / rect.height - 0.5;
+      optics.style.setProperty('--yaw', `${-42 + x * 22}deg`);
+      optics.style.setProperty('--pitch', `${-17 - y * 18}deg`);
     });
-    list.addEventListener('mouseleave', () => peek.classList.remove('on'));
+    optics.addEventListener('pointerleave', () => {
+      optics.style.removeProperty('--yaw');
+      optics.style.removeProperty('--pitch');
+    });
   }
 
   // ---- full showreel with sound, in a dialog
