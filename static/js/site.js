@@ -45,6 +45,40 @@
     });
   }
 
+  // Move the selected photograph to the front of the stack.
+  const picker = document.querySelector('.frame-picker');
+  if (picker) {
+    const slides = [...document.querySelectorAll('[data-slide]')];
+    const choices = [...picker.querySelectorAll('button')];
+    const link = document.querySelector('.frame-link');
+    choices.forEach((choice, current) => choice.addEventListener('click', () => {
+      slides.forEach((slide, index) => {
+        slide.dataset.position = (index - current + slides.length) % slides.length;
+        slide.setAttribute('aria-hidden', String(index !== current));
+        choices[index].setAttribute('aria-pressed', String(index === current));
+      });
+      link.href = choice.dataset.href;
+      link.textContent = choice.dataset.linkLabel;
+    }));
+  }
+
+  // Tilt only the photographic surface. Links, forms and captions stay readable.
+  const canTilt = matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
+  document.querySelectorAll('[data-depth], .card').forEach((surface) => {
+    surface.addEventListener('pointermove', (event) => {
+      if (!canTilt.matches) return;
+      const box = surface.getBoundingClientRect();
+      const x = (event.clientX - box.left) / box.width - 0.5;
+      const y = (event.clientY - box.top) / box.height - 0.5;
+      surface.style.setProperty('--tilt-x', (-y * 9) + 'deg');
+      surface.style.setProperty('--tilt-y', (x * 13) + 'deg');
+    });
+    surface.addEventListener('pointerleave', () => {
+      surface.style.removeProperty('--tilt-x');
+      surface.style.removeProperty('--tilt-y');
+    });
+  });
+
   // ---- full showreel with sound, in a dialog
   const reel = document.getElementById('reel');
   const reelBtn = document.querySelector('[data-reel]');

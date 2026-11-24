@@ -44,7 +44,7 @@ Then open http://localhost:4173
 
 ## Visual design
 
-The homepage uses a layered CSS camera lens. Pointer movement changes the viewing angle. The Lens spacing control moves the rings along their optical axis and supports touch and keyboard input. Automatic motion follows the visitor's reduced-motion preference. Typography uses DM Sans, Georgia and IBM Plex Mono.
+The homepage opens with a stack of three featured photographs. Visitors can select a frame and follow its link. Inside pages use mounted prints or a production credits card. The About page includes an interactive camera lens. Its Lens spacing control moves the rings along their optical axis and supports touch and keyboard input. Automatic motion follows the visitor's reduced-motion preference. Typography uses DM Sans, Georgia and IBM Plex Mono.
 
 ## The two forms
 

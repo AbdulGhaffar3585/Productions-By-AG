@@ -113,7 +113,8 @@ def card(p, i, sizes="(min-width: 1000px) 33vw, (min-width: 640px) 50vw, 100vw")
   <div class="card-body">
 
     <h3>{e(p["client"])}</h3>
-    <p class="muted">{e(p["short"])}</p>
+    <p class="muted">{e(p["listing"])}</p>
+    <p class="card-credit">My role · {e(p["role"])}</p>
     <p class="label">{e(p["type"])} · {e(p["year"])}</p>
   </div>
 </a>'''
@@ -151,15 +152,71 @@ def cta_band(heading=None, line=None):
 </section>'''
 
 
+def print_mount(picture, caption, credit, *, eager=False):
+    """A mounted print with a visible caption and a second plane beneath it."""
+    return f"""<figure class="print-mount" data-depth>
+      <div class="print-face">
+        {img(picture, caption, "(min-width: 760px) 43vw, 90vw", eager=eager)}
+        <figcaption><strong>{e(caption)}</strong><span>{e(credit)}</span></figcaption>
+      </div>
+    </figure>"""
+
+
+def screening_room():
+    frames = [
+        ("alkhidmat", "Flood relief", "Alkhidmat Foundation · Documentary", "/work/alkhidmat", "Documentary", "See the flood-relief project"),
+        ("psop", "Badshahi Mosque", "Editorial photography · Lahore", "/services#photography", "Photography", "Explore photography services"),
+        ("total-parco", "Fueling Progress", "Total Parco · Brand campaign", "/work/total-parco", "Brand film", "See Fueling Progress"),
+    ]
+    mounts = "".join(
+        f'<div class="slide" data-slide="{i}" data-position="{i}" aria-hidden="{str(bool(i)).lower()}">'
+        f'{print_mount(picture, title, credit, eager=(i == 0))}</div>'
+        for i, (picture, title, credit, _, _, _) in enumerate(frames)
+    )
+    options = "".join(
+        f'<button type="button" aria-label="Show {e(title)}" aria-pressed="{str(i == 0).lower()}" '
+        f'data-pick="{i}" data-href="{url}" data-link-label="{e(link)}">{e(name)}</button>'
+        for i, (_, title, _, url, name, link) in enumerate(frames)
+    )
+    return f"""<section class="screening-room">
+      <div class="shell screening-stage">
+        <div class="opening-copy">
+          {label("Abdul Ghaffar  /  Lahore, Pakistan")}
+          <h1>Films with a<br><em>human focus.</em></h1>
+          <p>I direct documentaries, edit brand films and photograph the people and places behind them.</p>
+          <div class="actions">
+            <button type="button" class="watch" data-reel="{SITE["showreel_vimeo"]}">{PLAY}Play showreel</button>
+            <a class="link" href="/work">Explore the work</a>
+          </div>
+        </div>
+        <div class="slide-viewer">
+          <div class="slide-stack">{mounts}</div>
+          <div class="frame-picker" role="group" aria-label="Choose a featured frame">{options}</div>
+          <a href="{frames[0][3]}" class="frame-link">{e(frames[0][5])}</a>
+        </div>
+      </div>
+    </section>"""
+
+
+# Artwork and captions are specific to the subject of each page.
+HEADER_PRINTS = {
+    "Work": ("total-parco", "Fueling Progress", "Total Parco · Editing & design"),
+    "About": ("abdul-ghaffar", "Abdul Ghaffar", "Director · Cinematographer · Lahore"),
+    "Services": ("alkhidmat", "Alkhidmat Foundation", "Field documentaries · Southern Punjab"),
+    "Collaborations": ("tedx", "TEDx GCU", "Event photography & video"),
+    "Start a project": ("hero-poster", "From the showreel", "Productions by AG"),
+    "Contact": ("psop", "Badshahi Mosque", "Lahore, Pakistan"),
+}
+
+
 def page_header(lbl, heading, sub=""):
-    sub_html = f'<p class="lede">{e(sub)}</p>' if sub else ""
-    return f'''<section class="page-head">
-  <div class="shell">
-    {label(lbl)}
-    <h1 class="display">{heading}</h1>
-    {sub_html}
-  </div>
-</section>'''
+    print_html = print_mount(*HEADER_PRINTS[lbl], eager=True)
+    return f"""<section class="page-head">
+      <div class="shell spread-head">
+        <div>{label(lbl)}<h1 class="display">{heading}</h1><p class="lede">{e(sub)}</p></div>
+        {print_html}
+      </div>
+    </section>"""
 
 
 def stars(text):
@@ -266,7 +323,7 @@ def layout(path, title, description, body, page_class="", og_image="/img/film-ou
 
 # ------------------------------------------------------------------ pages
 
-def home():
+def optical_model():
     # Layer spacing follows the focus control along the lens's local optical axis.
     rings = "".join(
         f'<i class="lens-ring {surface}" style="--layer:{i};--size:{size}%"></i>'
@@ -276,6 +333,13 @@ def home():
             ("ridge", 100), ("front", 100),
         ])
     )
+    return f"""<div class="optics about-optics">
+      <div class="chamber" aria-hidden="true"><div class="lens">{rings}<div class="glass"><div class="iris"></div></div></div></div>
+      <div class="console"><label>Explore the camera lens<input type="range" min="0" max="100" value="25" aria-label="3D lens spacing"></label></div>
+    </div>"""
+
+
+def home():
     featured = "".join(card(project(slug), i) for i, slug in enumerate(C.HOME["featured"]))
     disciplines = "".join(
         f'<a href="/services#{d["id"]}"><strong>{e(d["name"])}</strong><small>{e(d["line"])}</small></a>'
@@ -283,27 +347,9 @@ def home():
     )
     partners = "".join(f'<li>{e(name)}</li>' for name in C.HOME["trusted"])
     body = f"""
-<section class="optical-hero">
-  <div class="shell stage">
-    <div class="hero-copy">
-      <p class="label">Abdul Ghaffar · Filmmaker in Lahore</p>
-      <h1>Films and content for brands <em>worth remembering.</em></h1>
-      <p class="lede">{e(C.HOME["subhead"])}</p>
-      <div class="actions">{btn("View work", "/work")}{btn("Start a project", "/start", "line")}</div>
-    </div>
-    <div class="optics">
-      <div class="chamber" aria-hidden="true">
-        <div class="lens">{rings}<div class="glass"><div class="iris"></div></div></div>
-      </div>
-      <div class="console">
-        <button type="button" class="watch" data-reel="{SITE["showreel_vimeo"]}">▶ &nbsp; Play showreel</button>
-        <label>Lens spacing <input type="range" min="0" max="100" value="25" aria-label="3D lens spacing"></label>
-      </div>
-    </div>
-  </div>
-</section>
+{screening_room()}
 <section class="shell showcase">
-  <div class="section-title"><div>{label("Featured work")}<h2>Stories I've stayed<br>long enough to find.</h2></div><a class="link" href="/work">See all work</a></div>
+  <div class="section-title"><div>{label("Featured work")}<h2>Stories I've stayed<br> long enough to find.</h2></div><a class="link" href="/work">See all work</a></div>
   <div class="contact-sheet">{featured}</div>
 </section>
 <section class="shell bio-spread">
@@ -398,18 +444,21 @@ def case_study(p, prev, nxt):
     meta = "".join(f'<div><dt class="label">{k}</dt><dd>{e(v)}</dd></div>' for k, v in
                    [("Client", p["client"]), ("Category", p["type"]), ("Year", p["year"]), ("Role", p["role"])])
 
-    hero_media = f'<div class="shell cs-hero" data-reveal>{cover(p, "100vw", eager=True)}</div>' if p.get("cover") else ""
+    if p.get("cover"):
+        artwork = print_mount(p["cover"], p["client"], p["short"], eager=True)
+    else:
+        deliverables = dict(p["making"]).get("Deliverables", p["short"])
+        artwork = f'<div class="credit-plate" data-depth>{label("Production credits")}<h2>{e(p["short"])}</h2><p>{e(deliverables)}</p></div>'
 
     body = f'''
 <section class="page-head cs-head">
-  <div class="shell">
+  <div class="shell spread-head"><div>
     <p class="label crumbs"><a href="/work">Work</a> &nbsp;/&nbsp; {e(p["client"])}</p>
     <h1 class="display">{italic_last(p["title"])}</h1>
     <p class="lede">{e(p["standfirst"])}</p>
     <dl class="cs-meta">{meta}</dl>
-  </div>
+  </div>{artwork}</div>
 </section>
-{hero_media}
 {story}
 {films}
 {stills}
@@ -434,7 +483,7 @@ def about():
 {page_header("About", italic_last(A["headline"]), A["intro"])}
 <section class="section section-tight">
   <div class="shell about-grid">
-    <figure class="portrait" data-reveal>{img("abdul-ghaffar", "Abdul Ghaffar", "(min-width: 900px) 40vw, 100vw")}<figcaption class="label"><span>Abdul Ghaffar</span><span>Lahore</span></figcaption></figure>
+    {optical_model()}
     <div class="about-story" data-reveal>
       <p class="roles">{e(A["roles"])}</p>
       {story}
@@ -596,7 +645,7 @@ def contact():
     </form>
     <aside class="promo">
       {label("Have a project in mind?")}
-      <h2 class="h3">Send a proper brief instead.</h2>
+      <h2 class="h3">Planning a shoot?</h2>
       <p>Pick the type of project and timeline, and I'll come back with the right questions.</p>
       {btn("Start a project", "/start")}
     </aside>
@@ -611,6 +660,7 @@ def not_found():
   <div class="shell">
     {label("404 · Scene missing")}
     <h1 class="display">This page didn't make the final <em>cut.</em></h1>
+    {print_mount("hero-poster", "From the showreel", "Productions by AG")}
     <div class="actions">{btn("Back home", "/")}{btn("See the work", "/work", "line")}</div>
   </div>
 </section>'''
