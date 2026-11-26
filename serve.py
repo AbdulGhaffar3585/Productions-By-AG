@@ -2,7 +2,7 @@
 import http.server, os
 from pathlib import Path
 
-PUBLIC = Path(__file__).parent / "public"
+PUBLIC = Path(__file__).parent / "concept"
 
 class H(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *a, **k):
